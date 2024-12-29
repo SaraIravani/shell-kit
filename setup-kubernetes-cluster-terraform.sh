@@ -5,7 +5,7 @@ PROJECT_DIR="terraform-k8s-cluster-aws"
 mkdir -p  $PROJECT_DIR
 cd  $PROJECT_DIR || exit
 # Create subdirectories
-mkdir -p modules/{vpc,security-groups,master-nodes,worker-nodes,storage-nodes,etcd-nodes,haproxy-keeplived,outputs} \
+mkdir -p modules/{vpc,security-groups,master-nodes,worker-nodes,storage-nodes,etcd-nodes,haproxy-keeplived,outputs,s3-backup} \
          scripts \
          environments/{dev,QA,staging,production}
 # Create Terraform files
@@ -18,13 +18,17 @@ for env in dev QA staging production; do
   touch environments/$env/variables.tf
 done
 # Create module-specific files
-for module in vpc security-groups master-nodes worker-nodes storage-nodes etcd-nodes haproxy-keeplived outputs; do
+for module in vpc security-groups master-nodes worker-nodes storage-nodes etcd-nodes haproxy-keeplived outputs s3-backup; do
   mkdir -p modules/$module
   touch modules/$module/main.tf
   touch modules/$module/variables.tf
   touch modules/$module/outputs.tf
   touch modules/$module/providers.tf
 done
+
+# Create templates for IAM roles/policies (e.g., S3 policy for backups)
+touch templates/s3-policy.json
+
 # Create scripts for bootstrapping nodes
 touch scripts/bootstrap-master.sh
 touch scripts/bootstrap-worker.sh
@@ -32,5 +36,10 @@ touch scripts/bootstrap-storage.sh
 touch scripts/bootstrap-etcd.sh
 touch scripts/bootstrap-haproxy-keeplived.sh
 touch scripts/setup-k8s.sh
+touch scripts/setup-backup-script.sh
+
+# Add execute permissions to scripts
+chmod +x scripts/*.sh
+
 # Print success message
 echo "Project structure for Terraform Kubernetes cluster created successfully!"
